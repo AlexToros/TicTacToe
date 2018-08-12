@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using TicTacToeLibrary;
 
 namespace TicTacToeServer
 {
@@ -19,5 +20,8 @@ namespace TicTacToeServer
         {
             NetworkStream stream = client.GetStream();
         }
+
+        public void SendNewPlayerList()
+        { }
     }
 }
