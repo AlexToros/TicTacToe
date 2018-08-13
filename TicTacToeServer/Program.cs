@@ -25,12 +25,9 @@ namespace TicTacToeServer
                 while (true)
                 {
                     TcpClient client = listener.AcceptTcpClient();
-                    Player player = new Player(client);
-                    ServerPlayers.OnPlayersChanged += player.SendNewPlayerList;
-                    ServerPlayers.New(player);
-
-                    Thread clientThread = new Thread(player.Process);
-                    clientThread.Start();
+                    Console.WriteLine("Было подключение");
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(ProcessConnection));
+                    clientThread.Start(client);
                 }
             }
             catch (Exception ex)
@@ -41,6 +38,13 @@ namespace TicTacToeServer
             {
                 listener?.Stop();
             }
+        }
+        static void ProcessConnection(object client)
+        {
+            NetworkStream stream = ((TcpClient)client).GetStream();
+
+            byte firstByte = (byte)stream.ReadByte();
+            Commands InputCommand = (Commands)firstByte;
         }
     }
 }

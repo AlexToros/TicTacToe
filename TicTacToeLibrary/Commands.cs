@@ -9,8 +9,12 @@ namespace TicTacToeLibrary
     /// <summary>
     /// Перечисление комманд, доступных для передачи серверу
     /// </summary>
-    public enum Commands
+    public enum Commands : byte
     {
+        /// <summary>
+        /// Подключение клиента
+        /// </summary>
+        CONNECT = 0x00,
         /// <summary>
         /// Приглашение другого игрока
         /// </summary>
