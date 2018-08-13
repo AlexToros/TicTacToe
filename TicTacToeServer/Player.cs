@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using TicTacToeLibrary;
+using System.IO;
 
 namespace TicTacToeServer
 {
@@ -37,23 +38,17 @@ namespace TicTacToeServer
 
         public void SendNewPlayerList(List<Player> players)
         {
-            StringBuilder sb = new StringBuilder();
+            NetworkStream stream = client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write(players.Count - 1);
+            
             for (int i = 0; i < players.Count; i++)
             {
                 if (players[i].ID != this.ID)
                 {
-                    sb.Append(players[i].ID.ToString() + ";" + players[i].Name);
-                    if (i != players.Count - 1) sb.Append("|");
+                    writer.Write(players[i].ID);
+                    writer.Write(players[i].Name);
                 }
-            }
-            string message = sb.ToString();
-            byte[] send = Encoding.UTF8.GetBytes(message);
-            lock (locker)
-            {
-                NetworkStream stream = client.GetStream();
-
-                stream.WriteByte((byte)Commands.NEW_PLAYER_LIST);
-                stream.Write(send, 0, send.Length);
             }
         }
     }

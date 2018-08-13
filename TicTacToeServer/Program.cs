@@ -7,6 +7,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using TicTacToeLibrary;
+using System.IO;
 
 namespace TicTacToeServer
 {
@@ -43,8 +44,14 @@ namespace TicTacToeServer
         {
             NetworkStream stream = ((TcpClient)client).GetStream();
 
-            byte firstByte = (byte)stream.ReadByte();
-            Commands InputCommand = (Commands)firstByte;
+            byte[] buffer = new byte[64];
+
+            BinaryReader reader = new BinaryReader(stream);
+            string Name = reader.ReadString();
+            Console.WriteLine(Name + " Подключен");
+            Player player = new Player((TcpClient)client);
+            player.Name = Name;
+            ServerPlayers.New(player);
         }
     }
 }
