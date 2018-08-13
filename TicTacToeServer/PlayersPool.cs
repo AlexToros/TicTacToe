@@ -9,7 +9,7 @@ namespace TicTacToeServer
     class PlayersPool
     {
         private List<Player> players;
-        public delegate void NotifyPlayers();
+        public delegate void NotifyPlayers(List<Player> players);
         public event NotifyPlayers OnPlayersChanged;
 
         public PlayersPool()
@@ -21,7 +21,7 @@ namespace TicTacToeServer
         {
             OnPlayersChanged += player.SendNewPlayerList;
             players.Add(player);
-            OnPlayersChanged.Invoke();
+            OnPlayersChanged.Invoke(players);
         }
     }
 }

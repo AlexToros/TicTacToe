@@ -14,6 +14,10 @@ namespace TicTacToeLibrary
         /// <summary>
         /// Приглашение другого игрока
         /// </summary>
-        INVITE = 0x001,
+        INVITE = 0x01,
+        /// <summary>
+        /// Уведомление о новом списке игроков
+        /// </summary>
+        NEW_PLAYER_LIST = 0x02,
     }
 }
