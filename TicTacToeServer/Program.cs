@@ -15,13 +15,15 @@ namespace TicTacToeServer
     {
         static TcpListener listener;
         static PlayersPool ServerPlayers;
+        static GamesPool OpenGames;
         static QuerryHandler handler;
         static void Main(string[] args)
         {
             try
             {
                 ServerPlayers = new PlayersPool();
-                handler = new QuerryHandler(ServerPlayers);
+                OpenGames = new GamesPool();
+                handler = new QuerryHandler(ServerPlayers, OpenGames);
                 listener = new TcpListener(IPAddress.Parse(Options.Addres), Options.Port);
                 listener.Start();
                 Console.WriteLine("Сервер стартовал. Ожидание игроков.");

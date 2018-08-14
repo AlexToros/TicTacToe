@@ -18,7 +18,8 @@ namespace TicTacToeServer
         public TcpClient client { get; private set; }
         public uint ID { get; private set; }
         public string Name { get; set; }
-        public PlayersPool playersPool { get; set; }
+        public Team Team { get; set; }
+        public Game Game { get; set; }
 
         public Player(TcpClient Client)
         {
@@ -58,4 +59,5 @@ namespace TicTacToeServer
             }
         }
     }
+    enum Team { Cross, Circle }
 }

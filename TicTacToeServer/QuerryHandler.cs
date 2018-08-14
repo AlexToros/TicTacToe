@@ -14,10 +14,12 @@ namespace TicTacToeServer
     class QuerryHandler
     {
         private PlayersPool ServerPlayers;
+        private GamesPool OpenGames;
 
-        public QuerryHandler(PlayersPool playersPool)
+        public QuerryHandler(PlayersPool playersPool, GamesPool gamesPool)
         {
             ServerPlayers = playersPool;
+            OpenGames = gamesPool;
         }
 
         public void ClientQuerryHandler(object client)
@@ -33,6 +35,7 @@ namespace TicTacToeServer
                     switch (command)
                     {
                         case Commands.INVITE:
+                            ProcessPlayerInvite(tcpClient);
                             break;
                         case Commands.NEW_PLAYER_LIST:
                             ProcessNewPlayer(tcpClient);
@@ -48,6 +51,30 @@ namespace TicTacToeServer
             catch (Exception ex)
             { Console.WriteLine(ex.ToString()); }
 
+        }
+
+        private void ProcessPlayerInvite(TcpClient client)
+        {
+            Game newGame;
+            BinaryReader reader = new BinaryReader(client.GetStream());
+            uint InvitorPlayerId = reader.ReadUInt32();
+            uint targetPlayerId = reader.ReadUInt32();
+            Player invitorPl = ServerPlayers.GetPlayer(InvitorPlayerId);
+            TcpClient targetClient = ServerPlayers.GetPlayer(targetPlayerId).client;
+            BinaryWriter writer = new BinaryWriter(targetClient.GetStream());
+            writer.Write((byte)Commands.INVITE);
+            writer.Write(InvitorPlayerId);
+            reader = new BinaryReader(targetClient.GetStream());
+            bool Accept = reader.ReadBoolean();
+            if (Accept)
+            {
+                newGame = new Game(invitorPl, ServerPlayers.GetPlayer(targetPlayerId));
+                OpenGames.Add(newGame);
+                writer.Write((byte)Commands.ACCEPT_INVITE);
+                writer = new BinaryWriter(client.GetStream());
+                writer.Write((byte)Commands.ACCEPT_INVITE);
+            }
+            
         }
 
         private void ProcessNewPlayer(TcpClient client)

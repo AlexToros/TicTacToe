@@ -23,5 +23,9 @@ namespace TicTacToeLibrary
         /// Уведомление об отключении клиента
         /// </summary>
         DISCONNECT = 0x03,
+        /// <summary>
+        /// Принять запрос
+        /// </summary>
+        ACCEPT_INVITE = 0x04,
     }
 }

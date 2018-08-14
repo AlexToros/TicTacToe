@@ -62,6 +62,7 @@ namespace TicTacToeClient
                 switch (command)
                 {
                     case Commands.INVITE:
+                        ProcessPlayerInvite();
                         break;
                     case Commands.NEW_PLAYER_LIST:
                         int playerscount = reader.ReadInt32();
@@ -72,10 +73,25 @@ namespace TicTacToeClient
                         }
                         PlayerList = String.Join("|", list);
                         break;
+                    case Commands.ACCEPT_INVITE:
+                        MessageBox.Show("Игра готова!");
+                        break;
                     default:
                         break;
                 }
                 
+            }
+        }
+
+        private void ProcessPlayerInvite()
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            DialogResult res = MessageBox.Show("Вас пригласил на игру игрок с ID " + reader.ReadUInt32().ToString(), "Внимание!", MessageBoxButtons.OKCancel);
+            if (res == DialogResult.OK)
+            {
+                BinaryWriter writer = new BinaryWriter(stream);
+                writer.Write(true);
             }
         }
 
@@ -84,6 +100,15 @@ namespace TicTacToeClient
             NetworkStream stream = client.GetStream();
             BinaryWriter writer = new BinaryWriter(stream);
             writer.Write((byte)Commands.DISCONNECT);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.INVITE);
+            writer.Write((UInt32)1);
+            writer.Write((UInt32)2);
         }
     }
 }

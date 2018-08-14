@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -23,14 +24,14 @@ namespace TicTacToeServer
         {
             OnPlayersChanged += player.SendNewPlayerList;
             players.Add(player);
-            player.playersPool = this;
             OnPlayersChanged.Invoke(players);
         }
-        public void DisconnectPlayer(Player player)
+
+        public Player GetPlayer(uint PlayerId)
         {
-            players.Remove(player);
-            OnPlayersChanged?.Invoke(players);
+            return players.Single(p => p.ID == PlayerId);
         }
+
         private void DisconnectHandler()
         {
             while (true)
@@ -41,10 +42,11 @@ namespace TicTacToeServer
                     if (!players[i].client.Connected)
                     {
                         players.RemoveAt(i--);
-                        OnPlayersChanged.Invoke(players);
+                        OnPlayersChanged?.Invoke(players);
                     }
                 }
             }
         }
+
     }
 }
