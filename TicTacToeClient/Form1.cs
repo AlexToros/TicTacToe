@@ -48,6 +48,7 @@ namespace TicTacToeClient
             client = new TcpClient(Options.Addres, Options.Port);
             NetworkStream stream = client.GetStream();
             BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.NEW_PLAYER_LIST);
             writer.Write("USER" + rnd.Next(100));
             Thread ServerListner = new Thread(new ThreadStart(ServerHandler));
             ServerListner.Start();
@@ -57,14 +58,32 @@ namespace TicTacToeClient
             while (true)
             {
                 BinaryReader reader = new BinaryReader(client.GetStream());
-                int playerscount = reader.ReadInt32();
-                List<string> list = new List<string>();
-                for (int i = 0; i < playerscount; i++)
+                Commands command = (Commands)reader.ReadByte();
+                switch (command)
                 {
-                    list.Add(reader.ReadInt32().ToString() + ";" + reader.ReadString());
+                    case Commands.INVITE:
+                        break;
+                    case Commands.NEW_PLAYER_LIST:
+                        int playerscount = reader.ReadInt32();
+                        List<string> list = new List<string>();
+                        for (int i = 0; i < playerscount; i++)
+                        {
+                            list.Add(reader.ReadInt32().ToString() + ";" + reader.ReadString());
+                        }
+                        PlayerList = String.Join("|", list);
+                        break;
+                    default:
+                        break;
                 }
-                PlayerList = String.Join("|", list);
+                
             }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.DISCONNECT);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.Threading;
 using TicTacToeLibrary;
 using System.IO;
 
@@ -14,11 +15,11 @@ namespace TicTacToeServer
         static object locker = new object();
         static uint ID_Counter = 1;
 
-        private TcpClient client;
-
+        public TcpClient client { get; private set; }
         public uint ID { get; private set; }
         public string Name { get; set; }
-        
+        public PlayersPool playersPool { get; set; }
+
         public Player(TcpClient Client)
         {
             lock (locker)
@@ -38,16 +39,21 @@ namespace TicTacToeServer
 
         public void SendNewPlayerList(List<Player> players)
         {
-            NetworkStream stream = client.GetStream();
-            BinaryWriter writer = new BinaryWriter(stream);
-            writer.Write(players.Count - 1);
-            
-            for (int i = 0; i < players.Count; i++)
+            if (client.Connected)
             {
-                if (players[i].ID != this.ID)
+                NetworkStream stream = client.GetStream();
+                BinaryWriter writer = new BinaryWriter(stream);
+
+                writer.Write((byte)Commands.NEW_PLAYER_LIST);
+                writer.Write(players.Count - 1);
+
+                for (int i = 0; i < players.Count; i++)
                 {
-                    writer.Write(players[i].ID);
-                    writer.Write(players[i].Name);
+                    if (players[i].ID != this.ID)
+                    {
+                        writer.Write(players[i].ID);
+                        writer.Write(players[i].Name);
+                    }
                 }
             }
         }

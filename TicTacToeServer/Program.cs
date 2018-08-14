@@ -15,11 +15,13 @@ namespace TicTacToeServer
     {
         static TcpListener listener;
         static PlayersPool ServerPlayers;
+        static QuerryHandler handler;
         static void Main(string[] args)
         {
             try
             {
                 ServerPlayers = new PlayersPool();
+                handler = new QuerryHandler(ServerPlayers);
                 listener = new TcpListener(IPAddress.Parse(Options.Addres), Options.Port);
                 listener.Start();
                 Console.WriteLine("Сервер стартовал. Ожидание игроков.");
@@ -27,7 +29,7 @@ namespace TicTacToeServer
                 {
                     TcpClient client = listener.AcceptTcpClient();
                     Console.WriteLine("Было подключение");
-                    Thread clientThread = new Thread(new ParameterizedThreadStart(ProcessConnection));
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(handler.ClientQuerryHandler));
                     clientThread.Start(client);
                 }
             }
@@ -40,18 +42,6 @@ namespace TicTacToeServer
                 listener?.Stop();
             }
         }
-        static void ProcessConnection(object client)
-        {
-            NetworkStream stream = ((TcpClient)client).GetStream();
 
-            byte[] buffer = new byte[64];
-
-            BinaryReader reader = new BinaryReader(stream);
-            string Name = reader.ReadString();
-            Console.WriteLine(Name + " Подключен");
-            Player player = new Player((TcpClient)client);
-            player.Name = Name;
-            ServerPlayers.New(player);
-        }
     }
 }

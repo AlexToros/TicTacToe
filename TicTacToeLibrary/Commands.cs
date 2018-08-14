@@ -12,10 +12,6 @@ namespace TicTacToeLibrary
     public enum Commands : byte
     {
         /// <summary>
-        /// Подключение клиента
-        /// </summary>
-        CONNECT = 0x00,
-        /// <summary>
         /// Приглашение другого игрока
         /// </summary>
         INVITE = 0x01,
@@ -23,5 +19,9 @@ namespace TicTacToeLibrary
         /// Уведомление о новом списке игроков
         /// </summary>
         NEW_PLAYER_LIST = 0x02,
+        /// <summary>
+        /// Уведомление об отключении клиента
+        /// </summary>
+        DISCONNECT = 0x03,
     }
 }
