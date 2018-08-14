@@ -74,6 +74,18 @@ namespace TicTacToeServer
             writer.Write((byte)Commands.TURN);
             writer.Write(rowINDX);
             writer.Write(colINDX);
+            if (currentGame.IsOver)
+                SendGameOver(currentGame);
+        }
+
+        private void SendGameOver(Game currentGame)
+        {
+            BinaryWriter crossWriter = new BinaryWriter(currentGame.CrossPlayer.client.GetStream());
+            BinaryWriter circleWriter = new BinaryWriter(currentGame.CirclePlayer.client.GetStream());
+            crossWriter.Write((byte)Commands.GAME_OVER);
+            circleWriter.Write((byte)Commands.GAME_OVER);
+            crossWriter.Write(currentGame.CrossPlayer.Winner.Value);
+            circleWriter.Write(currentGame.CirclePlayer.Winner.Value);
         }
 
         private void ProcessDenied(TcpClient tcpClient)

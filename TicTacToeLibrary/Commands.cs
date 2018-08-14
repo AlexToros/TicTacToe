@@ -35,5 +35,9 @@ namespace TicTacToeLibrary
         /// Команда для обработки хода игрока
         /// </summary>
         TURN = 0x06,
+        /// <summary>
+        /// Код конца игры
+        /// </summary>
+        GAME_OVER = 0x07,
     }
 }

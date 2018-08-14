@@ -79,6 +79,9 @@ namespace TicTacToeClient
                 Commands command = (Commands)reader.ReadByte();
                 switch (command)
                 {
+                    case Commands.GAME_OVER:
+                        ProcessGameOver();
+                        break;
                     case Commands.TURN:
                         ProcessTurn();
                         break;
@@ -106,6 +109,15 @@ namespace TicTacToeClient
                 }
 
             }
+        }
+
+        private void ProcessGameOver()
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            bool IamWinner = reader.ReadBoolean();
+            string message = IamWinner ? "победили!" : "проиграли!";
+            MessageBox.Show(Text + ", Вы " + message);
         }
 
         private void ProcessTurn()

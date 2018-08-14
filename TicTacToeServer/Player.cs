@@ -20,9 +20,11 @@ namespace TicTacToeServer
         public string Name { get; set; }
         public Symbol Symbol { get; set; }
         public Game Game { get; set; }
+        public bool? Winner { get; set; }
 
         public Player(TcpClient Client)
         {
+            Winner = null;
             lock (locker)
             {
                 ID = ID_Counter++;
