@@ -19,8 +19,6 @@ namespace TicTacToeServer
         static QuerryHandler handler;
         static void Main(string[] args)
         {
-            Game g = new Game(null, null);
-            
             try
             {
                 ServerPlayers = new PlayersPool();

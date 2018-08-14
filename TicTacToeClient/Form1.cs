@@ -21,7 +21,7 @@ namespace TicTacToeClient
         Random rnd = new Random();
         TcpClient client;
         private string _playerList;
-
+        UInt32 GameID;
         public string PlayerList
         {
             get => _playerList; set
@@ -75,7 +75,8 @@ namespace TicTacToeClient
                         PlayerList = String.Join("|", list);
                         break;
                     case Commands.ACCEPT_INVITE:
-                        MessageBox.Show("Игра готова!");
+                        GameID = reader.ReadUInt32();
+                        MessageBox.Show("Игра готова! ID игры - " + GameID.ToString());
                         break;
                     case Commands.DENIED_INVITE:
                         MessageBox.Show(Text + ", Игрок отклонил приглашение!");

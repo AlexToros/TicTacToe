@@ -87,8 +87,10 @@ namespace TicTacToeServer
             OpenGames.Add(newGame);
             BinaryWriter writer = new BinaryWriter(tcpClient.GetStream());
             writer.Write((byte)Commands.ACCEPT_INVITE);
+            writer.Write(newGame.ID);
             writer = new BinaryWriter(first.client.GetStream());
             writer.Write((byte)Commands.ACCEPT_INVITE);
+            writer.Write(newGame.ID);
         }
 
         private void ProcessPlayerInvite(TcpClient client)
