@@ -34,6 +34,9 @@ namespace TicTacToeServer
                     Commands command = (Commands)reader.ReadByte();
                     switch (command)
                     {
+                        case Commands.TURN:
+                            ProcessTurn(tcpClient);
+                            break;
                         case Commands.INVITE:
                             ProcessPlayerInvite(tcpClient);
                             break;
@@ -57,6 +60,11 @@ namespace TicTacToeServer
             catch (Exception ex)
             { Console.WriteLine(ex.ToString()); }
 
+        }
+
+        private void ProcessTurn(TcpClient tcpClient)
+        {
+            throw new NotImplementedException();
         }
 
         private void ProcessDenied(TcpClient tcpClient)

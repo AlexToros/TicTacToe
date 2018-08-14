@@ -31,5 +31,9 @@ namespace TicTacToeLibrary
         /// Отклонить запрос
         /// </summary>
         DENIED_INVITE = 0x05,
+        /// <summary>
+        /// Команда для обработки хода игрока
+        /// </summary>
+        TURN = 0x06,
     }
 }
