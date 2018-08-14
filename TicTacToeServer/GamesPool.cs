@@ -13,6 +13,9 @@ namespace TicTacToeServer
 
         }
 
-
+        public Game GetGame(UInt32 ID)
+        {
+            return this.Single(g => g.ID == ID);
+        }
     }
 }

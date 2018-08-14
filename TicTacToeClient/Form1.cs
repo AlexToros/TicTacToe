@@ -22,6 +22,18 @@ namespace TicTacToeClient
         TcpClient client;
         private string _playerList;
         UInt32 GameID;
+        Symbol symbol;
+        private bool _isMyTurn;
+
+        public bool IsMyTurn
+        {
+            get => _isMyTurn;
+            set
+            {
+                _isMyTurn = value;
+                NotifyPropChanged();
+            }
+        }
         public string PlayerList
         {
             get => _playerList; set
@@ -33,7 +45,12 @@ namespace TicTacToeClient
         public Form1()
         {
             InitializeComponent();
+            symbol = Symbol.Cross;
+            IsMyTurn = true;
             label1.DataBindings.Add("Text", this, "PlayerList", false, DataSourceUpdateMode.OnPropertyChanged);
+            textBox1.DataBindings.Add("Enabled", this, "IsMyTurn", false, DataSourceUpdateMode.OnPropertyChanged);
+            textBox2.DataBindings.Add("Enabled", this, "IsMyTurn", false, DataSourceUpdateMode.OnPropertyChanged);
+            button2.DataBindings.Add("Enabled", this, "IsMyTurn", false, DataSourceUpdateMode.OnPropertyChanged);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -62,6 +79,9 @@ namespace TicTacToeClient
                 Commands command = (Commands)reader.ReadByte();
                 switch (command)
                 {
+                    case Commands.TURN:
+                        ProcessTurn();
+                        break;
                     case Commands.INVITE:
                         ProcessPlayerInvite();
                         break;
@@ -84,8 +104,19 @@ namespace TicTacToeClient
                     default:
                         break;
                 }
-                
+
             }
+        }
+
+        private void ProcessTurn()
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            string message = symbol == Symbol.Cross ? "Нолик" : "Крестик";
+            int row = reader.ReadInt32();
+            int col = reader.ReadInt32();
+            MessageBox.Show("Оппонент поставил " + message + " на координаты " + (row + 1).ToString() + "," + (col + 1).ToString());
+            IsMyTurn = true;
         }
 
         private void ProcessPlayerInvite()
@@ -100,6 +131,8 @@ namespace TicTacToeClient
                 writer.Write((byte)Commands.ACCEPT_INVITE);
                 writer.Write(InviterID);
                 writer.Write((UInt32)2);
+                symbol = Symbol.Circle;
+                IsMyTurn = false;
             }
             else
             {
@@ -122,6 +155,18 @@ namespace TicTacToeClient
             writer.Write((byte)Commands.INVITE);
             writer.Write((UInt32)1);
             writer.Write((UInt32)2);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            NetworkStream stream = client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.TURN);
+            writer.Write(GameID);
+            writer.Write(Convert.ToUInt32(textBox1.Text));
+            writer.Write(Convert.ToUInt32(textBox2.Text));
+
+            IsMyTurn = false;
         }
     }
 }

@@ -59,5 +59,4 @@ namespace TicTacToeServer
             }
         }
     }
-    enum Symbol { None, Cross, Circle }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeLibrary;
 
 namespace TicTacToeServer
 {
@@ -15,7 +16,8 @@ namespace TicTacToeServer
         public Player CirclePlayer { get; set; }
         public uint ID { get; private set; }
 
-        private Symbol[,] Field = new Symbol[3, 3]; 
+        private Symbol[,] Field = new Symbol[3, 3];
+        private Player TurnOwner;
 
         public Game(Player crossPlayer, Player circlePlayer)
         {
@@ -32,6 +34,19 @@ namespace TicTacToeServer
 
             crossPlayer.Symbol = Symbol.Cross;
             circlePlayer.Symbol = Symbol.Circle;
+
+            TurnOwner = crossPlayer;
+        }
+
+        internal Player Turn(int rowINDX, int colINDX)
+        {
+            Field[rowINDX, colINDX] = TurnOwner.Symbol;
+            if (TurnOwner.Symbol == Symbol.Cross)
+                TurnOwner = CirclePlayer;
+            else
+                TurnOwner = CrossPlayer;
+
+            return TurnOwner;
         }
     }
 }

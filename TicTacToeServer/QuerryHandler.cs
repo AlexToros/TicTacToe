@@ -64,7 +64,16 @@ namespace TicTacToeServer
 
         private void ProcessTurn(TcpClient tcpClient)
         {
-            throw new NotImplementedException();
+            BinaryReader reader = new BinaryReader(tcpClient.GetStream());
+            uint GameID = reader.ReadUInt32();
+            Game currentGame = OpenGames.GetGame(GameID);
+            int rowINDX = reader.ReadInt32();
+            int colINDX = reader.ReadInt32();
+            Player nextPlayer = currentGame.Turn(rowINDX, colINDX);
+            BinaryWriter writer = new BinaryWriter(nextPlayer.client.GetStream());
+            writer.Write((byte)Commands.TURN);
+            writer.Write(rowINDX);
+            writer.Write(colINDX);
         }
 
         private void ProcessDenied(TcpClient tcpClient)

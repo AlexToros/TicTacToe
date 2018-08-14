@@ -6,10 +6,22 @@ using System.Threading.Tasks;
 
 namespace TicTacToeLibrary
 {
-    enum Symbol
+    /// <summary>
+    /// Возможные состояния поля
+    /// </summary>
+    public enum Symbol
     {
+        /// <summary>
+        /// Пусто
+        /// </summary>
         None,
+        /// <summary>
+        /// Крестик
+        /// </summary>
         Cross,
+        /// <summary>
+        /// Нолик
+        /// </summary>
         Circle
     }
 }
