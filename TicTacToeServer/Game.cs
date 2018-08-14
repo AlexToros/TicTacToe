@@ -11,6 +11,8 @@ namespace TicTacToeServer
         public Player CrossPlayer { get; set; }
         public Player CirclePlayer { get; set; }
 
+        private Symbol[,] Field = new Symbol[3, 3]; 
+
         public Game(Player crossPlayer, Player circlePlayer)
         {
             CrossPlayer = crossPlayer;
@@ -18,6 +20,9 @@ namespace TicTacToeServer
 
             crossPlayer.Game = this;
             circlePlayer.Game = this;
+
+            crossPlayer.Symbol = Symbol.Cross;
+            circlePlayer.Symbol = Symbol.Circle;
         }
     }
 }

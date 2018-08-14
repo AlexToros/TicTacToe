@@ -52,6 +52,7 @@ namespace TicTacToeClient
             writer.Write("USER" + rnd.Next(100));
             Thread ServerListner = new Thread(new ThreadStart(ServerHandler));
             ServerListner.Start();
+            this.Text = rnd.Next(0, 10000).ToString();
         }
         private void ServerHandler()
         {
@@ -76,6 +77,9 @@ namespace TicTacToeClient
                     case Commands.ACCEPT_INVITE:
                         MessageBox.Show("Игра готова!");
                         break;
+                    case Commands.DENIED_INVITE:
+                        MessageBox.Show(Text + ", Игрок отклонил приглашение!");
+                        break;
                     default:
                         break;
                 }
@@ -87,11 +91,19 @@ namespace TicTacToeClient
         {
             NetworkStream stream = client.GetStream();
             BinaryReader reader = new BinaryReader(stream);
-            DialogResult res = MessageBox.Show("Вас пригласил на игру игрок с ID " + reader.ReadUInt32().ToString(), "Внимание!", MessageBoxButtons.OKCancel);
+            uint InviterID = reader.ReadUInt32();
+            DialogResult res = MessageBox.Show(this.Text + " Вас пригласил на игру игрок с ID " + InviterID.ToString(), "Внимание!", MessageBoxButtons.OKCancel);
+            BinaryWriter writer = new BinaryWriter(stream);
             if (res == DialogResult.OK)
             {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(true);
+                writer.Write((byte)Commands.ACCEPT_INVITE);
+                writer.Write(InviterID);
+                writer.Write((UInt32)2);
+            }
+            else
+            {
+                writer.Write((byte)Commands.DENIED_INVITE);
+                writer.Write(InviterID);
             }
         }
 

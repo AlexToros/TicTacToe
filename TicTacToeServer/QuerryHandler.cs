@@ -37,6 +37,12 @@ namespace TicTacToeServer
                         case Commands.INVITE:
                             ProcessPlayerInvite(tcpClient);
                             break;
+                        case Commands.ACCEPT_INVITE:
+                            ProcessAccepting(tcpClient);
+                            break;
+                        case Commands.DENIED_INVITE:
+                            ProcessDenied(tcpClient);
+                            break;
                         case Commands.NEW_PLAYER_LIST:
                             ProcessNewPlayer(tcpClient);
                             break;
@@ -53,9 +59,32 @@ namespace TicTacToeServer
 
         }
 
+        private void ProcessDenied(TcpClient tcpClient)
+        {
+            BinaryReader reader = new BinaryReader(tcpClient.GetStream());
+            uint InviterID = reader.ReadUInt32();
+            Player Inviter = ServerPlayers.GetPlayer(InviterID);
+            BinaryWriter writer = new BinaryWriter(Inviter.client.GetStream());
+            writer.Write((byte)Commands.DENIED_INVITE);
+        }
+
+        private void ProcessAccepting(TcpClient tcpClient)
+        {
+            BinaryReader reader = new BinaryReader(tcpClient.GetStream());
+            uint InviterID = reader.ReadUInt32();
+            uint AcceptorID = reader.ReadUInt32();
+            Player first = ServerPlayers.GetPlayer(InviterID);
+            Player second = ServerPlayers.GetPlayer(AcceptorID);
+            Game newGame = new Game(first, second);
+            OpenGames.Add(newGame);
+            BinaryWriter writer = new BinaryWriter(tcpClient.GetStream());
+            writer.Write((byte)Commands.ACCEPT_INVITE);
+            writer = new BinaryWriter(first.client.GetStream());
+            writer.Write((byte)Commands.ACCEPT_INVITE);
+        }
+
         private void ProcessPlayerInvite(TcpClient client)
         {
-            Game newGame;
             BinaryReader reader = new BinaryReader(client.GetStream());
             uint InvitorPlayerId = reader.ReadUInt32();
             uint targetPlayerId = reader.ReadUInt32();
@@ -64,17 +93,6 @@ namespace TicTacToeServer
             BinaryWriter writer = new BinaryWriter(targetClient.GetStream());
             writer.Write((byte)Commands.INVITE);
             writer.Write(InvitorPlayerId);
-            reader = new BinaryReader(targetClient.GetStream());
-            bool Accept = reader.ReadBoolean();
-            if (Accept)
-            {
-                newGame = new Game(invitorPl, ServerPlayers.GetPlayer(targetPlayerId));
-                OpenGames.Add(newGame);
-                writer.Write((byte)Commands.ACCEPT_INVITE);
-                writer = new BinaryWriter(client.GetStream());
-                writer.Write((byte)Commands.ACCEPT_INVITE);
-            }
-            
         }
 
         private void ProcessNewPlayer(TcpClient client)

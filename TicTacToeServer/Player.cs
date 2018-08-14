@@ -18,7 +18,7 @@ namespace TicTacToeServer
         public TcpClient client { get; private set; }
         public uint ID { get; private set; }
         public string Name { get; set; }
-        public Team Team { get; set; }
+        public Symbol Symbol { get; set; }
         public Game Game { get; set; }
 
         public Player(TcpClient Client)
@@ -59,5 +59,5 @@ namespace TicTacToeServer
             }
         }
     }
-    enum Team { Cross, Circle }
+    enum Symbol { None, Cross, Circle }
 }

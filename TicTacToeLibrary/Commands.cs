@@ -27,5 +27,9 @@ namespace TicTacToeLibrary
         /// Принять запрос
         /// </summary>
         ACCEPT_INVITE = 0x04,
+        /// <summary>
+        /// Отклонить запрос
+        /// </summary>
+        DENIED_INVITE = 0x05,
     }
 }
