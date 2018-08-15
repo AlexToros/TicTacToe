@@ -8,10 +8,7 @@ namespace TicTacToeServer
 {
     class GamesPool : List<Game>
     {
-        public GamesPool() : base()
-        {
-
-        }
+        public GamesPool() : base() { }
 
         public Game GetGame(UInt32 ID)
         {

@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 
 namespace TicTacToeClient
 {
-    public partial class Form1 : Form, INotifyPropertyChanged
+    public partial class MainForm : Form, INotifyPropertyChanged
     {
         Random rnd = new Random();
         TcpClient client;
@@ -24,6 +24,7 @@ namespace TicTacToeClient
         UInt32 GameID;
         Symbol symbol;
         private bool _isMyTurn;
+        uint MyID;
 
         public bool IsMyTurn
         {
@@ -42,7 +43,7 @@ namespace TicTacToeClient
                 NotifyPropChanged();
             }
         }
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             symbol = Symbol.Cross;
@@ -73,12 +74,15 @@ namespace TicTacToeClient
         }
         private void ServerHandler()
         {
+            BinaryReader reader = new BinaryReader(client.GetStream());
             while (true)
             {
-                BinaryReader reader = new BinaryReader(client.GetStream());
                 Commands command = (Commands)reader.ReadByte();
                 switch (command)
                 {
+                    case Commands.PLAYER_ID:
+                        MyID = reader.ReadUInt32();
+                        break;
                     case Commands.GAME_OVER:
                         ProcessGameOver();
                         break;

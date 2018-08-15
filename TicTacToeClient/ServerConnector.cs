@@ -1,0 +1,182 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using System.Threading;
+using System.Net.Sockets;
+using TicTacToeLibrary;
+using System.IO;
+
+namespace TicTacToeClient
+{
+    class ServerConnector
+    {
+        public bool IsMyTurn { get; private set; }
+        public string MyName { get; private set; }
+        public uint MyID { get; private set; }
+        public Game CurrentGame { get; private set; }
+        public PlayersPool PlayersOnline { get; private set; }
+
+        public delegate void InviteHandler(ServerConnector connector);
+        public event InviteHandler OnNewInvite;
+
+        private TcpClient Client { get; set; }
+
+        public ServerConnector(string userName)
+        {
+            MyName = userName;
+            Connect();
+        }
+
+        public void Disconnect()
+        {
+            NetworkStream stream = Client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.DISCONNECT);
+        }
+
+        public void InvitePlayer(uint PlayerId)
+        {
+            NetworkStream stream = Client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.INVITE);
+            writer.Write(MyID);
+            writer.Write(PlayerId);
+        }
+
+        public void MyTurn(int row, int col)
+        {
+            CurrentGame.MyTurn(row, col);
+            NetworkStream stream = Client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.TURN);
+            writer.Write(CurrentGame.ID);
+            writer.Write(row);
+            writer.Write(col);
+            IsMyTurn = false;
+        }
+
+        private void Connect()
+        {
+            Client = new TcpClient(Options.Addres, Options.Port);
+            NetworkStream stream = Client.GetStream();
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write((byte)Commands.NEW_PLAYER_LIST);
+            writer.Write(MyName);
+            Thread thread = new Thread(ServerHandling);
+            thread.Start();
+        }
+
+        private void ServerHandling()
+        {
+            BinaryReader reader = new BinaryReader(Client.GetStream());
+            while (true)
+            {
+                Commands command = (Commands)reader.ReadByte();
+                switch (command)
+                {
+                    case Commands.INVITE:
+                        ProcessPlayerInvite();
+                        break;
+                    case Commands.NEW_PLAYER_LIST:
+                        GetPlayersList();
+                        break;
+                    case Commands.DISCONNECT:
+                        break;
+                    case Commands.ACCEPT_INVITE:
+                        ProcessAccept();
+                        break;
+                    case Commands.DENIED_INVITE:
+                        ProcessDenied();
+                        break;
+                    case Commands.TURN:
+                        ProcessTurn();
+                        break;
+                    case Commands.GAME_OVER:
+                        ProcessGameOver();
+                        break;
+                    case Commands.PLAYER_ID:
+                        GetMyId();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void ProcessGameOver()
+        {
+            NetworkStream stream = Client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            bool IamWinner = reader.ReadBoolean();
+            CurrentGame.GameIsOver(IamWinner);
+        }
+
+        private void ProcessTurn()
+        {
+            NetworkStream stream = Client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            int row = reader.ReadInt32();
+            int col = reader.ReadInt32();
+            CurrentGame.OpponentTurn(row, col);
+            IsMyTurn = true;
+        }
+
+        private void ProcessAccept()
+        {
+            BinaryReader reader = new BinaryReader(Client.GetStream());
+            uint GameID = reader.ReadUInt32();
+            uint OpponentID = reader.ReadUInt32();
+            IsMyTurn = reader.ReadBoolean();
+            CurrentGame = new Game(GameID)
+            {
+                MySymbol = IsMyTurn ? Symbol.Cross : Symbol.Circle,
+                Opponent = PlayersOnline.GetPlayer(OpponentID)
+            };
+            CurrentGame.Opponent.Symbol = IsMyTurn ? Symbol.Circle : Symbol.Cross;
+
+            MessageBox.Show("Игра готова!");
+        }
+
+        private void ProcessDenied()
+        {
+            MessageBox.Show("Игрок отклонил приглашение!");
+        }
+
+        private void ProcessPlayerInvite()
+        {
+            NetworkStream stream = Client.GetStream();
+            BinaryReader reader = new BinaryReader(stream);
+            uint InviterID = reader.ReadUInt32();
+            Player candidate = PlayersOnline.GetPlayer(InviterID);
+            DialogResult res = MessageBox.Show("Вас пригласил на игру " + candidate.Name, "Внимание!", MessageBoxButtons.OKCancel);
+            BinaryWriter writer = new BinaryWriter(stream);
+            if (res == DialogResult.OK)
+            {
+                writer.Write((byte)Commands.ACCEPT_INVITE);
+                writer.Write(InviterID);
+                writer.Write(MyID);
+            }
+            else
+            {
+                writer.Write((byte)Commands.DENIED_INVITE);
+                writer.Write(InviterID);
+            }
+        }
+
+        private void GetPlayersList()
+        {
+            BinaryReader reader = new BinaryReader(Client.GetStream());
+            int playerscount = reader.ReadInt32();
+            PlayersOnline = new PlayersPool();
+            for (int i = 0; i < playerscount; i++)
+                PlayersOnline.NewPlayer(reader.ReadUInt32(), reader.ReadString());
+        }
+
+        private void GetMyId()
+        {
+            BinaryReader reader = new BinaryReader(Client.GetStream());
+            MyID = reader.ReadUInt32();
+        }
+    }
+}

@@ -32,14 +32,6 @@ namespace TicTacToeServer
             client = Client;
         }
 
-        public void Process()
-        {
-            lock (locker)
-            {
-                NetworkStream stream = client.GetStream();
-            }
-        }
-
         public void SendNewPlayerList(List<Player> players)
         {
             if (client.Connected)

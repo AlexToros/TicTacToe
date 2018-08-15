@@ -39,5 +39,9 @@ namespace TicTacToeLibrary
         /// Код конца игры
         /// </summary>
         GAME_OVER = 0x07,
+        /// <summary>
+        /// Код сообщения с ID игрока
+        /// </summary>
+        PLAYER_ID = 0x08,
     }
 }

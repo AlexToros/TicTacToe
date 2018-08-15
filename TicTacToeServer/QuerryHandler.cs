@@ -109,9 +109,13 @@ namespace TicTacToeServer
             BinaryWriter writer = new BinaryWriter(tcpClient.GetStream());
             writer.Write((byte)Commands.ACCEPT_INVITE);
             writer.Write(newGame.ID);
+            writer.Write(InviterID);
+            writer.Write(false);
             writer = new BinaryWriter(first.client.GetStream());
             writer.Write((byte)Commands.ACCEPT_INVITE);
             writer.Write(newGame.ID);
+            writer.Write(AcceptorID);
+            writer.Write(true);
         }
 
         private void ProcessPlayerInvite(TcpClient client)
@@ -133,6 +137,9 @@ namespace TicTacToeServer
             Console.WriteLine(Name + " Подключен");
             Player player = new Player(client);
             player.Name = Name;
+            BinaryWriter writer = new BinaryWriter(client.GetStream());
+            writer.Write((byte)Commands.PLAYER_ID);
+            writer.Write(player.ID);
             ServerPlayers.New(player);
         }
         private bool DisconnectPlayer(TcpClient client)
