@@ -6,26 +6,65 @@ using System.Threading;
 using System.Net.Sockets;
 using TicTacToeLibrary;
 using System.IO;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace TicTacToeClient
 {
-    class ServerConnector
+    class ServerConnector : INotifyPropertyChanged
     {
-        public bool IsMyTurn { get; private set; }
+        private bool _isMyTurn;
+        private bool _isDisconnect;
+
+        public bool IsMyTurn
+        {
+            get => _isMyTurn;
+            private set
+            {
+                _isMyTurn = value;
+                OnChangeTurn?.Invoke(_isMyTurn);
+            }
+        }
+        public bool IsDisconnect
+        {
+            get => _isDisconnect;
+
+            set
+            {
+                _isDisconnect = value;
+                NotifyPropertyChanged();
+            }
+        }
         public string MyName { get; private set; }
         public uint MyID { get; private set; }
         public Game CurrentGame { get; private set; }
-        public PlayersPool PlayersOnline { get; private set; }
+        public PlayersPool PlayersOnline { get; set; }
 
-        public delegate void InviteHandler(ServerConnector connector);
-        public event InviteHandler OnNewInvite;
+        public delegate void NewPlayers(PlayersPool NewList);
+        public event NewPlayers OnNewPlayers;
+
+        public delegate void StartNewGame(Game NewGame);
+        public event StartNewGame NewGameStarted;
+
+        public delegate void ChangeTurn(bool val);
+        public event ChangeTurn OnChangeTurn;
 
         private TcpClient Client { get; set; }
 
         public ServerConnector(string userName)
         {
             MyName = userName;
+            IsMyTurn = false;
+            PlayersOnline = new PlayersPool();
+
             Connect();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged([CallerMemberName] string propName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
         public void Disconnect()
@@ -134,7 +173,7 @@ namespace TicTacToeClient
                 Opponent = PlayersOnline.GetPlayer(OpponentID)
             };
             CurrentGame.Opponent.Symbol = IsMyTurn ? Symbol.Circle : Symbol.Cross;
-
+            NewGameStarted?.Invoke(CurrentGame);
             MessageBox.Show("Игра готова!");
         }
 
@@ -168,9 +207,10 @@ namespace TicTacToeClient
         {
             BinaryReader reader = new BinaryReader(Client.GetStream());
             int playerscount = reader.ReadInt32();
-            PlayersOnline = new PlayersPool();
+            PlayersOnline.Clear();
             for (int i = 0; i < playerscount; i++)
                 PlayersOnline.NewPlayer(reader.ReadUInt32(), reader.ReadString());
+            OnNewPlayers?.Invoke(PlayersOnline);
         }
 
         private void GetMyId()

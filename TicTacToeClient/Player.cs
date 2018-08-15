@@ -7,7 +7,7 @@ using TicTacToeLibrary;
 
 namespace TicTacToeClient
 {
-    class Player
+    public class Player
     {
         public uint ID { get; private set; }
         public string Name { get; private set; }
@@ -18,6 +18,10 @@ namespace TicTacToeClient
             ID = PlayerId;
             Name = PlayerName;
         }
-        
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
