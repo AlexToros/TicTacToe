@@ -15,8 +15,12 @@ namespace TicTacToeClient
     {
         private Game Game;
         private FieldCell[,] cells;
+        Action win;
+        Action loose;
         public TicTacToeField()
         {
+            win = new Action(Winner);
+            loose = new Action(Looser);
             InitializeComponent();
             cells = new FieldCell[3, 3];
             PictureBox[] pictureBoxes = this.tableLayoutPanel1.Controls.OfType<PictureBox>().ToArray();
@@ -41,7 +45,32 @@ namespace TicTacToeClient
 
         private void Game_OnGameOver(bool IamWiner)
         {
-            MessageBox.Show(IamWiner ? "Вы победили!" : "Вы проиграли!");
+            if (IamWiner)
+                win.Invoke();
+            else
+                loose.Invoke();
+        }
+
+        private void Winner()
+        {
+            this.tableLayoutPanel1.Controls.OfType<PictureBox>().ToList().ForEach(pb => {
+                pb.Image = null;                
+            });
+            this.tableLayoutPanel1.Controls.OfType<PictureBox>().ToList().ForEach(pb => {
+                Graphics g = pb.CreateGraphics();
+                g.DrawString("WINNER", new Font("Arial", 7), Brushes.Green, new PointF(0, 10));
+            });
+        }
+
+        private void Looser()
+        {
+            this.tableLayoutPanel1.Controls.OfType<PictureBox>().ToList().ForEach(pb => {
+                pb.Image = null;                
+            });
+            this.tableLayoutPanel1.Controls.OfType<PictureBox>().ToList().ForEach(pb => {
+                Graphics g = pb.CreateGraphics();
+                g.DrawString("LOOSER", new Font("Arial", 7), Brushes.Red, new PointF(0, 10));
+            });
         }
 
         private void Cell_OnClick(int row, int col)

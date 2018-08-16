@@ -22,7 +22,7 @@ namespace TicTacToeClient
             private set
             {
                 _isMyTurn = value;
-                OnChangeTurn?.Invoke(_isMyTurn);
+                NotifyPropertyChanged();
             }
         }
         public bool IsDisconnect
@@ -45,10 +45,7 @@ namespace TicTacToeClient
 
         public delegate void StartNewGame(Game NewGame);
         public event StartNewGame NewGameStarted;
-
-        public delegate void ChangeTurn(bool val);
-        public event ChangeTurn OnChangeTurn;
-
+        
         private TcpClient Client { get; set; }
 
         public ServerConnector(string userName)

@@ -41,7 +41,6 @@ namespace TicTacToeClient
                 connector = new ServerConnector(textBox1.Text);
                 connector.OnNewPlayers += Connector_OnNewPlayers;
                 connector.NewGameStarted += Connector_NewGameStarted;
-                connector.OnChangeTurn += Connector_OnChangeTurn;
             }
             else
             {
@@ -51,6 +50,7 @@ namespace TicTacToeClient
 
             ConnectButton.DataBindings.Add("Enabled", connector, "IsDisconnect");
             textBox1.DataBindings.Add("Enabled", connector, "IsDisconnect");
+            ticTacToeField1.DataBindings.Add("Enabled", connector, "IsMyTurn");
         }
         
         private void Connector_OnChangeTurn(bool val)
