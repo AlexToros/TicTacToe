@@ -64,12 +64,16 @@ namespace TicTacToeServer
 
         private void ProcessTurn(TcpClient tcpClient)
         {
+            Console.WriteLine("Обработка хода");
             BinaryReader reader = new BinaryReader(tcpClient.GetStream());
+            Console.Write("\tЧтение ID игры: ");
             uint GameID = reader.ReadUInt32();
+            Console.WriteLine(GameID);
             Game currentGame = OpenGames.GetGame(GameID);
             int rowINDX = reader.ReadInt32();
             int colINDX = reader.ReadInt32();
             Player nextPlayer = currentGame.Turn(rowINDX, colINDX);
+            Console.WriteLine("\tИмя следующего игрока - " + nextPlayer.Name);
             BinaryWriter writer = new BinaryWriter(nextPlayer.client.GetStream());
             writer.Write((byte)Commands.TURN);
             writer.Write(rowINDX);
@@ -80,6 +84,7 @@ namespace TicTacToeServer
 
         private void SendGameOver(Game currentGame)
         {
+            Console.WriteLine("Обработка конца игры");
             BinaryWriter crossWriter = new BinaryWriter(currentGame.CrossPlayer.client.GetStream());
             BinaryWriter circleWriter = new BinaryWriter(currentGame.CirclePlayer.client.GetStream());
             crossWriter.Write((byte)Commands.GAME_OVER);
@@ -90,6 +95,7 @@ namespace TicTacToeServer
 
         private void ProcessDenied(TcpClient tcpClient)
         {
+            Console.WriteLine("Обработка отказа");
             BinaryReader reader = new BinaryReader(tcpClient.GetStream());
             uint InviterID = reader.ReadUInt32();
             Player Inviter = ServerPlayers.GetPlayer(InviterID);
@@ -99,7 +105,9 @@ namespace TicTacToeServer
 
         private void ProcessAccepting(TcpClient tcpClient)
         {
+            Console.WriteLine("Обработка согласия на игру");
             BinaryReader reader = new BinaryReader(tcpClient.GetStream());
+            Console.WriteLine("\tЧтение ID игроков");
             uint InviterID = reader.ReadUInt32();
             uint AcceptorID = reader.ReadUInt32();
             Player first = ServerPlayers.GetPlayer(InviterID);
@@ -107,6 +115,7 @@ namespace TicTacToeServer
             Game newGame = new Game(first, second);
             OpenGames.Add(newGame);
             BinaryWriter writer = new BinaryWriter(tcpClient.GetStream());
+            Console.WriteLine("\tОтправка данных о новой игре");
             writer.Write((byte)Commands.ACCEPT_INVITE);
             writer.Write(newGame.ID);
             writer.Write(InviterID);
@@ -120,30 +129,39 @@ namespace TicTacToeServer
 
         private void ProcessPlayerInvite(TcpClient client)
         {
+            Console.WriteLine("Обработка приглашения от игрока");
             BinaryReader reader = new BinaryReader(client.GetStream());
+            Console.Write("\tЧтение ID пригласившего: ");
             uint InvitorPlayerId = reader.ReadUInt32();
+            Console.Write(InvitorPlayerId + "\n\tЧтение ID приглашаемого: ");
             uint targetPlayerId = reader.ReadUInt32();
+            Console.WriteLine(targetPlayerId);
             Player invitorPl = ServerPlayers.GetPlayer(InvitorPlayerId);
             TcpClient targetClient = ServerPlayers.GetPlayer(targetPlayerId).client;
             BinaryWriter writer = new BinaryWriter(targetClient.GetStream());
+            Console.WriteLine("\tОтправка инвайта приглашенному игроку");
             writer.Write((byte)Commands.INVITE);
+            Console.WriteLine("\tОтправка ID приглашающего игрока");
             writer.Write(InvitorPlayerId);
         }
 
         private void ProcessNewPlayer(TcpClient client)
         {
+            Console.WriteLine("Обработка нового подключения");
             BinaryReader reader = new BinaryReader(client.GetStream());
             string Name = reader.ReadString();
-            Console.WriteLine(Name + " Подключен");
+            Console.WriteLine("\t" + Name + " Подключен");
             Player player = new Player(client);
             player.Name = Name;
             BinaryWriter writer = new BinaryWriter(client.GetStream());
+            Console.WriteLine("\tОтправка выданного ID");
             writer.Write((byte)Commands.PLAYER_ID);
             writer.Write(player.ID);
             ServerPlayers.New(player);
         }
         private bool DisconnectPlayer(TcpClient client)
         {
+            Console.WriteLine("Закрытие соединения");
             client.Client.Shutdown(SocketShutdown.Both);
             client.Close();
             return true;

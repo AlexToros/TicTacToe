@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TicTacToeLibrary;
 
 namespace TicTacToeClient
@@ -23,6 +24,9 @@ namespace TicTacToeClient
         public delegate void GameOver(bool IamWiner);
         public event GameOver OnGameOver;
 
+        public delegate void ServerTurn(int row, int col);
+        public event ServerTurn SendTurnToServer;
+
         public Game(uint GameID)
         {
             Field = new Symbol[3, 3];
@@ -39,6 +43,7 @@ namespace TicTacToeClient
         {
             Field[row, col] = MySymbol;
             OnNewTurn?.Invoke(Field[row, col], row, col);
+            SendTurnToServer?.Invoke(row, col);
         }
 
         internal void GameIsOver(bool IamWinner) => OnGameOver?.Invoke(IamWinner);

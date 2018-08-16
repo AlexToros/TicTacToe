@@ -83,9 +83,8 @@ namespace TicTacToeClient
             writer.Write(PlayerId);
         }
 
-        public void MyTurn(int row, int col)
+        private void MyTurn(int row, int col)
         {
-            CurrentGame.MyTurn(row, col);
             NetworkStream stream = Client.GetStream();
             BinaryWriter writer = new BinaryWriter(stream);
             writer.Write((byte)Commands.TURN);
@@ -145,6 +144,7 @@ namespace TicTacToeClient
 
         private void ProcessGameOver()
         {
+            IsMyTurn = false;
             NetworkStream stream = Client.GetStream();
             BinaryReader reader = new BinaryReader(stream);
             bool IamWinner = reader.ReadBoolean();
@@ -173,6 +173,7 @@ namespace TicTacToeClient
                 Opponent = PlayersOnline.GetPlayer(OpponentID)
             };
             CurrentGame.Opponent.Symbol = IsMyTurn ? Symbol.Circle : Symbol.Cross;
+            CurrentGame.SendTurnToServer += MyTurn;
             NewGameStarted?.Invoke(CurrentGame);
             MessageBox.Show("Игра готова!");
         }

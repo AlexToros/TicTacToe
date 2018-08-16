@@ -36,7 +36,12 @@ namespace TicTacToeClient
         {
             Game = game;
             Game.OnNewTurn += ProcessTurn;
-            Enabled = true;
+            Game.OnGameOver += Game_OnGameOver;
+        }
+
+        private void Game_OnGameOver(bool IamWiner)
+        {
+            MessageBox.Show(IamWiner ? "Вы победили!" : "Вы проиграли!");
         }
 
         private void Cell_OnClick(int row, int col)
